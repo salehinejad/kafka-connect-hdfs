@@ -1,6 +1,8 @@
 package dp.hdfs.lines;
 
 
+import java.sql.Timestamp;
+
 import io.confluent.connect.avro.AvroData;
 import io.confluent.connect.hdfs.Format;
 import io.confluent.connect.hdfs.HdfsSinkConnectorConfig;

@@ -2,6 +2,8 @@ package dp.hdfs.pathparse;
 
 import org.junit.Test;
 
+import java.sql.Timestamp;
+
 import dp.hdfs.HdfsConfig;
 
 /**
