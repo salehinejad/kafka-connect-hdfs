@@ -13,11 +13,7 @@ package dp.hdfs.lines; /**
  **/
 
 import com.datapipeline.base.exceptions.NeedOpsException;
-import com.datapipeline.base.kafka.SinkRecordSerializer;
 
-import org.apache.avro.file.DataFileWriter;
-import org.apache.avro.generic.GenericDatumWriter;
-import org.apache.avro.io.DatumWriter;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.FSDataOutputStream;
 import org.apache.hadoop.fs.Path;
@@ -28,6 +24,7 @@ import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
 
+import dp.hdfs.HdfsConfig;
 import dp.hdfs.record.parse.RecordParse;
 import io.confluent.connect.avro.AvroData;
 import io.confluent.connect.hdfs.RecordWriter;
@@ -38,9 +35,7 @@ public class LineWriterProvider implements RecordWriterProvider {
 
     private static final Logger log = LoggerFactory.getLogger(LineWriterProvider.class);
 
-    //TODO  get EXTENSION from json
-    private final static String EXTENSION = ".tsv";
-
+    private final static String EXTENSION = HdfsConfig.FILE_EXTENSION;
 
     @Override
     public String getExtension() {
@@ -51,8 +46,6 @@ public class LineWriterProvider implements RecordWriterProvider {
     public RecordWriter<SinkRecord> getRecordWriter(
         Configuration conf, final String fileName, SinkRecord record, final AvroData avroData)
         throws IOException {
-        DatumWriter<Object> datumWriter = new GenericDatumWriter<>();
-        final DataFileWriter<Object> writer = new DataFileWriter<>(datumWriter);
         Path path = new Path(fileName);
         final FSDataOutputStream out = path.getFileSystem(conf).create(path);
 
@@ -60,10 +53,14 @@ public class LineWriterProvider implements RecordWriterProvider {
             @Override
             public void write(SinkRecord record) throws IOException {
                 try {
-                    String line = RecordParse.getInsertUpdateDataLine(record);
-                    out.write(line.getBytes());
+                    String line = RecordParse.getInsertUpdateDataLine(record) + "\n";
+                    if (line != null) {
+                        out.write(line.getBytes());
+                    } else {
+                        log.warn("[LineWriterProvider] not contain after , maybe a delete log");
+                    }
                 } catch (NeedOpsException e) {
-                    e.printStackTrace();
+                    log.warn("[LineWriterProvider] a record can not parse");
                 } catch (JSONException e) {
                     log.warn("[LineWriterProvider] a record can not parse");
                 }
@@ -71,7 +68,6 @@ public class LineWriterProvider implements RecordWriterProvider {
 
             @Override
             public void close() throws IOException {
-                writer.close();
                 out.close();
             }
         };

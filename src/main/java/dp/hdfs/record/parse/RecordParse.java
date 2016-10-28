@@ -13,6 +13,8 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 
+import dp.hdfs.HdfsConfig;
+
 /**
  * SinkRecord is avro styp.
  * parse avro to data
@@ -26,6 +28,12 @@ public class RecordParse {
 
         JSONObject parseJson = serializeRecord.serializeRecord(record);
         JSONObject afterValue = parseJson.getJSONObject("after");
+
+        //TODO  delete after is null
+        //Delete not support
+        if (afterValue == null) {
+            return null;
+        }
 
         List<String> list = new ArrayList<>();
 
@@ -43,6 +51,6 @@ public class RecordParse {
 //                  e.printStackTrace();
 //              }
 //            });
-        return Joiner.on(",").join(list);
+        return Joiner.on(HdfsConfig.HDFS_LINE_SPLIT).join(list);
     }
 }
