@@ -5,8 +5,10 @@ package dp.hdfs;
  */
 public class HdfsConfig {
 
-//    private static final String KEY_LINE_SPLIT = "LINE_SPLIT";
+    //TODO  change by sinktask, this is default
     public static String HDFS_LINE_SPLIT = ",";
+
+    public static String FILE_EXTENSION = ".csv";
 
     //filename like mysql_host_172_17_0_1_port_3307.inventory.a+0+0000000000+0000000000.tsv
     public static final String DP_COMMMITTED_FILENAME_SEPARATOR_REGEX = "[+]";

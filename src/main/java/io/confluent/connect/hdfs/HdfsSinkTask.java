@@ -58,8 +58,13 @@ public class HdfsSinkTask extends SinkTask {
             hdfsWriter = new DataWriter(connectorConfig, context, avroData);
 
             String linesplit;
-            if((linesplit =connectorConfig.getString("line.split")) != null) {
-                HdfsConfig.HDFS_LINE_SPLIT =  linesplit;
+            if ((linesplit = connectorConfig.getString("line.split")) != null) {
+                HdfsConfig.HDFS_LINE_SPLIT = linesplit;
+                if (HdfsConfig.HDFS_LINE_SPLIT.equals(",")) {
+                    HdfsConfig.FILE_EXTENSION = ".csv";
+                } else {
+                    HdfsConfig.FILE_EXTENSION = ".tsv";
+                }
             }
             recover(assignment);
         } catch (ConfigException e) {
