@@ -152,7 +152,7 @@ public class FileUtils {
   }
 
   public static long extractOffset(String filename) {
-    return Long.parseLong(filename.split(HdfsConfig.FILE_EXTENSION)[3]);
+    return Long.parseLong(filename.split(HdfsConfig.DP_COMMMITTED_FILENAME_SEPARATOR_REGEX)[3]);
   }
 
   private static ArrayList<FileStatus> getDirectoriesImpl(Storage storage, Path path)
