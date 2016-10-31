@@ -40,8 +40,6 @@ import io.confluent.connect.avro.AvroData;
 import io.confluent.connect.hdfs.filter.CommittedFileFilter;
 import io.confluent.connect.hdfs.filter.TopicPartitionCommittedFileFilter;
 import io.confluent.connect.hdfs.partitioner.Partitioner;
-import io.confluent.connect.hdfs.schema.Compatibility;
-import io.confluent.connect.hdfs.schema.SchemaUtils;
 import io.confluent.connect.hdfs.storage.Storage;
 import io.confluent.connect.hdfs.wal.WAL;
 
@@ -73,7 +71,6 @@ public class TopicPartitionWriter {
     private Map<String, Long> offsets;
     private long timeoutMs;
     private long failureTime;
-    private Compatibility compatibility;
     private HdfsSinkConnectorConfig connectorConfig;
     private String extension;
     private final String zeroPadOffsetFormat;
@@ -115,9 +112,6 @@ public class TopicPartitionWriter {
         flushSize = connectorConfig.getInt(HdfsSinkConnectorConfig.FLUSH_SIZE_CONFIG);
         rotateIntervalMs = connectorConfig.getLong(HdfsSinkConnectorConfig.ROTATE_INTERVAL_MS_CONFIG);
         timeoutMs = connectorConfig.getLong(HdfsSinkConnectorConfig.RETRY_BACKOFF_CONFIG);
-        compatibility = SchemaUtils.getCompatibility(
-            connectorConfig.getString(HdfsSinkConnectorConfig.SCHEMA_COMPATIBILITY_CONFIG));
-
         String logsDir = connectorConfig.getString(HdfsSinkConnectorConfig.LOGS_DIR_CONFIG);
         wal = storage.wal(logsDir, tp);
 

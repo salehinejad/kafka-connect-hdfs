@@ -27,6 +27,7 @@ public class PathFilterText {
         System.out.println(parts[2]);
         System.out.println(parts[3]);
 
+//filename.split(HdfsSinkConnecorConstants.COMMMITTED_FILENAME_SEPARATOR_REGEX)[3]
 
 
     }
