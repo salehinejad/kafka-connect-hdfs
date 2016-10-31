@@ -38,7 +38,8 @@ public class HourlyPartitionerTest {
     partitioner.configure(config);
 
     String pathFormat = partitioner.getPathFormat();
-    String timeZoneString = (String) config.get(HdfsSinkConnectorConfig.TIMEZONE_CONFIG);
+//    String timeZoneString = (String) config.get(HdfsSinkConnectorConfig.TIMEZONE_CONFIG);
+    String timeZoneString = "Asia/Shanghai";
     long timestamp = new DateTime(2015, 2, 1, 3, 0, 0, 0, DateTimeZone.forID(timeZoneString)).getMillis();
     String encodedPartition = TimeUtils.encodeTimestamp(partitionDurationMs, pathFormat,
                                                         timeZoneString, timestamp);

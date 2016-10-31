@@ -39,13 +39,12 @@ public class LineFileReader implements SchemaFileReader {
 
   @Override
   public Schema getSchema(Configuration conf, Path path) throws IOException {
-//    SeekableInput input = new FsInput(path, conf);
-//    DatumReader<Object> reader = new GenericDatumReader<>();
-//    FileReader<Object> fileReader = DataFileReader.openReader(input, reader);
-//    org.apache.avro.Schema schema = fileReader.getSchema();
-//    fileReader.close();
-//    return avroData.toConnectSchema(schema);
-    return null;
+    SeekableInput input = new FsInput(path, conf);
+    DatumReader<Object> reader = new GenericDatumReader<>();
+    FileReader<Object> fileReader = DataFileReader.openReader(input, reader);
+    org.apache.avro.Schema schema = fileReader.getSchema();
+    fileReader.close();
+    return avroData.toConnectSchema(schema);
   }
 
   @Override

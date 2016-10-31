@@ -236,32 +236,8 @@ public class TopicPartitionWriter {
             pause();
             nextState();
           case WRITE_PARTITION_PAUSED:
-//            if (currentSchema == null) {
-//              if (compatibility != Compatibility.NONE && offset != -1) {
-//                String topicDir = FileUtils.topicDirectory(url, topicsDir, tp.topic());
-//                CommittedFileFilter filter = new TopicPartitionCommittedFileFilter(tp);
-//                FileStatus fileStatusWithMaxOffset = FileUtils.fileStatusWithMaxOffset(storage, new Path(topicDir), filter);
-//                if (fileStatusWithMaxOffset != null) {
-//                  currentSchema = schemaFileReader.getSchema(conf, fileStatusWithMaxOffset.getPath());
-//                }
-//              }
-//            }
             SinkRecord record = buffer.peek();
-//            Schema valueSchema = record.valueSchema();
-//            if (SchemaUtils.shouldChangeSchema(valueSchema, currentSchema, compatibility)) {
-//              currentSchema = valueSchema;
-//              if (hiveIntegration) {
-//                createHiveTable();
-//                alterHiveSchema();
-//              }
-//              if (recordCounter > 0) {
-//                nextState();
-//              } else {
-//                break;
-//              }
-//            } else {
-              SinkRecord projectedRecord = SchemaUtils.project(record, currentSchema, compatibility);
-              writeRecord(projectedRecord);
+              writeRecord(record);
               buffer.poll();
               if (shouldRotate(now)) {
                 log.info("Starting commit and rotation for topic partition {} with start offsets {}"

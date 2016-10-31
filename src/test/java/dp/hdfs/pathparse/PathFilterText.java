@@ -27,8 +27,6 @@ public class PathFilterText {
         System.out.println(parts[2]);
         System.out.println(parts[3]);
 
-        String name = "mysql_host_172_17_0_1_port_3307.inventory.a+0+0000000000+0000000000";
-
 
 
     }
