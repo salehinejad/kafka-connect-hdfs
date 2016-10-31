@@ -187,18 +187,11 @@ public class HdfsSinkConnectorConfig extends AbstractConfig {
     private static final String FILENAME_OFFSET_ZERO_PAD_WIDTH_DISPLAY = "Filename Offset Zero Pad Width";
 
     // Schema group
-//    public static final String SCHEMA_COMPATIBILITY_CONFIG = "schema.compatibility";
-//    private static final String SCHEMA_COMPATIBILITY_DOC =
-//        "The schema compatibility rule to use when the connector is observing schema changes. The "
-//            + "supported configurations are NONE, BACKWARD, FORWARD and FULL.";
-//    private static final String SCHEMA_COMPATIBILITY_DEFAULT = "NONE";
-//    private static final String SCHEMA_COMPATIBILITY_DISPLAY = "Schema Compatibility";
-
     public static final String SCHEMA_CACHE_SIZE_CONFIG = "schema.cache.size";
-//    private static final String SCHEMA_CACHE_SIZE_DOC =
-//        "The size of the schema cache used in the Avro converter.";
-//    public static final int SCHEMA_CACHE_SIZE_DEFAULT = 1000;
-//    private static final String SCHEMA_CACHE_SIZE_DISPLAY = "Schema Cache Size";
+    private static final String SCHEMA_CACHE_SIZE_DOC =
+        "The size of the schema cache used in the Avro converter.";
+    public static final int SCHEMA_CACHE_SIZE_DEFAULT = 1000;
+    private static final String SCHEMA_CACHE_SIZE_DISPLAY = "Schema Cache Size";
 
     // Internal group
     public static final String STORAGE_CLASS_CONFIG = "storage.class";
@@ -211,6 +204,7 @@ public class HdfsSinkConnectorConfig extends AbstractConfig {
     public static final String SECURITY_GROUP = "Security";
     public static final String CONNECTOR_GROUP = "Connector";
     public static final String INTERNAL_GROUP = "Internal";
+    public static final String SCHEMA_GROUP = "Schema";
 
     private static final ConfigDef.Recommender hdfsAuthenticationKerberosDependentsRecommender = new BooleanParentRecommender(HDFS_AUTHENTICATION_KERBEROS_CONFIG);
     private static final ConfigDef.Recommender partitionerClassDependentsRecommender = new PartitionerClassDependentsRecommender();
@@ -226,6 +220,8 @@ public class HdfsSinkConnectorConfig extends AbstractConfig {
             .define(TOPICS_DIR_CONFIG, Type.STRING, TOPICS_DIR_DEFAULT, Importance.HIGH, TOPICS_DIR_DOC, HDFS_GROUP, 4, Width.SHORT, TOPICS_DIR_DISPLAY)
             .define(LOGS_DIR_CONFIG, Type.STRING, LOGS_DIR_DEFAULT, Importance.HIGH, LOGS_DIR_DOC, HDFS_GROUP, 5, Width.SHORT, LOGS_DIR_DISPLAY)
             .define(FORMAT_CLASS_CONFIG, Type.STRING, FORMAT_CLASS_DEFAULT, Importance.HIGH, FORMAT_CLASS_DOC, HDFS_GROUP, 6, Width.SHORT, FORMAT_CLASS_DISPLAY);
+
+        config.define(SCHEMA_CACHE_SIZE_CONFIG, Type.INT, SCHEMA_CACHE_SIZE_DEFAULT, Importance.LOW, SCHEMA_CACHE_SIZE_DOC, SCHEMA_GROUP, 2, Width.SHORT, SCHEMA_CACHE_SIZE_DISPLAY);
 
         // Define Security configuration group
         config.define(HDFS_AUTHENTICATION_KERBEROS_CONFIG, Type.BOOLEAN, HDFS_AUTHENTICATION_KERBEROS_DEFAULT, Importance.HIGH, HDFS_AUTHENTICATION_KERBEROS_DOC,
