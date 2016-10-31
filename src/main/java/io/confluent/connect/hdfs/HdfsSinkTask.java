@@ -14,6 +14,7 @@
 
 package io.confluent.connect.hdfs;
 
+import org.apache.hadoop.fs.Hdfs;
 import org.apache.kafka.clients.consumer.OffsetAndMetadata;
 import org.apache.kafka.common.TopicPartition;
 import org.apache.kafka.common.config.ConfigException;
@@ -59,11 +60,12 @@ public class HdfsSinkTask extends SinkTask {
 
             String linesplit;
             if ((linesplit = connectorConfig.getString("line.split")) != null) {
-                HdfsConfig.HDFS_LINE_SPLIT = linesplit;
-                if (HdfsConfig.HDFS_LINE_SPLIT.equals(",")) {
-                    HdfsConfig.FILE_EXTENSION = ".csv";
-                } else {
+                if (linesplit.contains("tsv")) {
                     HdfsConfig.FILE_EXTENSION = ".tsv";
+                    HdfsConfig.HDFS_LINE_SPLIT = "\t";
+                } else {
+                    HdfsConfig.FILE_EXTENSION = ".csv";
+                    HdfsConfig.HDFS_LINE_SPLIT = ",";
                 }
             }
             recover(assignment);
