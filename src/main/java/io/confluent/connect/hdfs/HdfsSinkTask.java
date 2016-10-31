@@ -27,6 +27,7 @@ import java.util.Collection;
 import java.util.Map;
 import java.util.Set;
 
+import dp.hdfs.HdfsConfig;
 import io.confluent.connect.avro.AvroData;
 import io.confluent.connect.hdfs.schema.Compatibility;
 import io.confluent.connect.hdfs.schema.SchemaUtils;
@@ -55,6 +56,11 @@ public class HdfsSinkTask extends SinkTask {
             int schemaCacheSize = connectorConfig.getInt(HdfsSinkConnectorConfig.SCHEMA_CACHE_SIZE_CONFIG);
             avroData = new AvroData(schemaCacheSize);
             hdfsWriter = new DataWriter(connectorConfig, context, avroData);
+
+            String linesplit;
+            if((linesplit =connectorConfig.getString("line.split")) != null) {
+                HdfsConfig.HDFS_LINE_SPLIT =  linesplit;
+            }
             recover(assignment);
         } catch (ConfigException e) {
             throw new ConnectException("Couldn't start HdfsSinkConnector due to configuration error.", e);

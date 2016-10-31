@@ -35,11 +35,16 @@ public class LineWriterProvider implements RecordWriterProvider {
 
     private static final Logger log = LoggerFactory.getLogger(LineWriterProvider.class);
 
-    private final static String EXTENSION = HdfsConfig.FILE_EXTENSION;
+//    private final static String EXTENSION = HdfsConfig.FILE_EXTENSION;
 
     @Override
     public String getExtension() {
-        return EXTENSION;
+
+        if (",".equals(HdfsConfig.HDFS_LINE_SPLIT)) {
+            return ".csv";
+        } else {
+            return ".tsv";
+        }
     }
 
     @Override

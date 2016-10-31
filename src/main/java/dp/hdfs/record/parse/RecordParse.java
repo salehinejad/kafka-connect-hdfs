@@ -16,11 +16,10 @@ import java.util.List;
 import dp.hdfs.HdfsConfig;
 
 /**
- * SinkRecord is avro styp.
+ * SinkRecord is avro stype.
  * parse avro to data
  */
 public class RecordParse {
-
 
     private static final SinkRecordSerializer serializeRecord = new SinkRecordSerializer();
 

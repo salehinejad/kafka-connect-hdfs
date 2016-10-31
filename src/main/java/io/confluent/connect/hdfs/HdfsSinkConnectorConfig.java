@@ -206,12 +206,27 @@ public class HdfsSinkConnectorConfig extends AbstractConfig {
     public static final String INTERNAL_GROUP = "Internal";
     public static final String SCHEMA_GROUP = "Schema";
 
+
+
+    public static final String KEY_LINE_SPLIT = "line.split";
+//    private static final String KEY_LINE_SPLIT_DOC = " a line split like , or table";
+
+//    private static final String KEY_FILE_EXTENSION = "FILE_EXTENSION";
+//    public static final String FILE_EXTENSION = StringUtils.isBlank(System.getenv(KEY_FILE_EXTENSION)) ? ".tsv" : System.getenv(KEY_FILE_EXTENSION);
+
+
+
+
+
     private static final ConfigDef.Recommender hdfsAuthenticationKerberosDependentsRecommender = new BooleanParentRecommender(HDFS_AUTHENTICATION_KERBEROS_CONFIG);
     private static final ConfigDef.Recommender partitionerClassDependentsRecommender = new PartitionerClassDependentsRecommender();
 
     private static ConfigDef config = new ConfigDef();
 
     static {
+
+        //
+        config.define(KEY_LINE_SPLIT,Type.STRING,Importance.HIGH,"doc");
 
         // Define HDFS configuration group
         config.define(HDFS_URL_CONFIG, Type.STRING, Importance.HIGH, HDFS_URL_DOC, HDFS_GROUP, 1, Width.MEDIUM, HDFS_URL_DISPLAY)
