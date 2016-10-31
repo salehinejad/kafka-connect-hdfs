@@ -33,93 +33,79 @@ import io.confluent.connect.hdfs.schema.SchemaUtils;
 
 public class HdfsSinkTask extends SinkTask {
 
-  private static final Logger log = LoggerFactory.getLogger(HdfsSinkTask.class);
-  private DataWriter hdfsWriter;
-  private AvroData avroData;
+    private static final Logger log = LoggerFactory.getLogger(HdfsSinkTask.class);
+    private DataWriter hdfsWriter;
+    private AvroData avroData;
 
-  public HdfsSinkTask() {
+    public HdfsSinkTask() {
 
-  }
+    }
 
-  @Override
-  public String version() {
-    return Version.getVersion();
-  }
+    @Override
+    public String version() {
+        return Version.getVersion();
+    }
 
-  @Override
-  public void start(Map<String, String> props) {
-    Set<TopicPartition> assignment = context.assignment();;
-    try {
-      HdfsSinkConnectorConfig connectorConfig = new HdfsSinkConnectorConfig(props);
-      boolean hiveIntegration = connectorConfig.getBoolean(HdfsSinkConnectorConfig.HIVE_INTEGRATION_CONFIG);
-      if (hiveIntegration) {
-        Compatibility compatibility = SchemaUtils.getCompatibility(
-            connectorConfig.getString(HdfsSinkConnectorConfig.SCHEMA_COMPATIBILITY_CONFIG));
-        if (compatibility == Compatibility.NONE) {
-          throw new ConfigException("Hive Integration requires schema compatibility to be BACKWARD, FORWARD or FULL");
+    @Override
+    public void start(Map<String, String> props) {
+        Set<TopicPartition> assignment = context.assignment();
+        ;
+        try {
+            HdfsSinkConnectorConfig connectorConfig = new HdfsSinkConnectorConfig(props);
+            int schemaCacheSize = connectorConfig.getInt(HdfsSinkConnectorConfig.SCHEMA_CACHE_SIZE_CONFIG);
+            avroData = new AvroData(schemaCacheSize);
+            hdfsWriter = new DataWriter(connectorConfig, context, avroData);
+            recover(assignment);
+        } catch (ConfigException e) {
+            throw new ConnectException("Couldn't start HdfsSinkConnector due to configuration error.", e);
+        } catch (ConnectException e) {
+            log.info("Couldn't start HdfsSinkConnector:", e);
+            log.info("Shutting down HdfsSinkConnector.");
+            if (hdfsWriter != null) {
+                hdfsWriter.close(assignment);
+                hdfsWriter.stop();
+            }
         }
-      }
-      int schemaCacheSize = connectorConfig.getInt(HdfsSinkConnectorConfig.SCHEMA_CACHE_SIZE_CONFIG);
-      avroData = new AvroData(schemaCacheSize);
-      hdfsWriter = new DataWriter(connectorConfig, context, avroData);
-      recover(assignment);
-      if (hiveIntegration) {
-        syncWithHive();
-      }
-    } catch (ConfigException e) {
-      throw new ConnectException("Couldn't start HdfsSinkConnector due to configuration error.", e);
-    } catch (ConnectException e) {
-      log.info("Couldn't start HdfsSinkConnector:", e);
-      log.info("Shutting down HdfsSinkConnector.");
-      if (hdfsWriter != null) {
-        hdfsWriter.close(assignment);
-        hdfsWriter.stop();
-      }
     }
-  }
 
-  @Override
-  public void stop() throws ConnectException {
-    if (hdfsWriter != null) {
-      hdfsWriter.stop();
+    @Override
+    public void stop() throws ConnectException {
+        if (hdfsWriter != null) {
+            hdfsWriter.stop();
+        }
     }
-  }
 
-  @Override
-  public void put(Collection<SinkRecord> records) throws ConnectException {
-    try {
-      hdfsWriter.write(records);
-    } catch (ConnectException e) {
-      throw new ConnectException(e);
+    @Override
+    public void put(Collection<SinkRecord> records) throws ConnectException {
+        try {
+            hdfsWriter.write(records);
+        } catch (ConnectException e) {
+            throw new ConnectException(e);
+        }
     }
-  }
 
-  @Override
-  public void flush(Map<TopicPartition, OffsetAndMetadata> offsets) {
-    // Do nothing as the connector manages the offset
-  }
-
-  @Override
-  public void open(Collection<TopicPartition> partitions) {
-    hdfsWriter.open(partitions);
-  }
-
-  @Override
-  public void close(Collection<TopicPartition> partitions) {
-    hdfsWriter.close(partitions);
-  }
-
-  private void recover(Set<TopicPartition> assignment) {
-    for (TopicPartition tp: assignment) {
-      hdfsWriter.recover(tp);
+    @Override
+    public void flush(Map<TopicPartition, OffsetAndMetadata> offsets) {
+        // Do nothing as the connector manages the offset
     }
-  }
 
-  private void syncWithHive() throws ConnectException {
-    hdfsWriter.syncWithHive();
-  }
+    @Override
+    public void open(Collection<TopicPartition> partitions) {
+        hdfsWriter.open(partitions);
+    }
 
-  public AvroData getAvroData() {
-    return avroData;
-  }
+    @Override
+    public void close(Collection<TopicPartition> partitions) {
+        hdfsWriter.close(partitions);
+    }
+
+    private void recover(Set<TopicPartition> assignment) {
+        for (TopicPartition tp : assignment) {
+            hdfsWriter.recover(tp);
+        }
+    }
+
+    public AvroData getAvroData() {
+        return avroData;
+    }
 }

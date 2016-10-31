@@ -15,11 +15,9 @@
 package io.confluent.connect.hdfs;
 
 import io.confluent.connect.avro.AvroData;
-import io.confluent.connect.hdfs.hive.HiveMetaStore;
-import io.confluent.connect.hdfs.hive.HiveUtil;
 
 public interface Format {
   RecordWriterProvider getRecordWriterProvider();
   SchemaFileReader getSchemaFileReader(AvroData avroData);
-  HiveUtil getHiveUtil(HdfsSinkConnectorConfig config, AvroData avroData, HiveMetaStore hiveMetaStore);
+//  HiveUtil getHiveUtil(HdfsSinkConnectorConfig config, AvroData avroData, HiveMetaStore hiveMetaStore);
 }

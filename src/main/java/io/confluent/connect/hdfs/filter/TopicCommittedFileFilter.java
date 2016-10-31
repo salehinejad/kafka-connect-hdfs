@@ -17,7 +17,6 @@ package io.confluent.connect.hdfs.filter;
 import org.apache.hadoop.fs.Path;
 
 import dp.hdfs.HdfsConfig;
-import io.confluent.connect.hdfs.HdfsSinkConnecorConstants;
 
 public class TopicCommittedFileFilter extends CommittedFileFilter {
     private String topic;

@@ -25,40 +25,40 @@ import java.util.List;
 import java.util.Map;
 
 public class SchemaSourceConnector extends SourceConnector {
-  private Map<String, String> config;
+    private Map<String, String> config;
 
-  @Override
-  public String version() {
-    return AppInfoParser.getVersion();
-  }
-
-  @Override
-  public void start(Map<String, String> props) {
-    this.config = props;
-  }
-
-  @Override
-  public Class<? extends Task> taskClass() {
-    return SchemaSourceTask.class;
-  }
-
-  @Override
-  public List<Map<String, String>> taskConfigs(int maxTasks) {
-    ArrayList<Map<String, String>> configs = new ArrayList<>();
-    for (Integer i = 0; i < maxTasks; i++) {
-      Map<String, String> props = new HashMap<>(config);
-      props.put(SchemaSourceTask.ID_CONFIG, i.toString());
-      configs.add(props);
+    @Override
+    public String version() {
+        return AppInfoParser.getVersion();
     }
-    return configs;
-  }
 
-  @Override
-  public void stop() {
-  }
+    @Override
+    public void start(Map<String, String> props) {
+        this.config = props;
+    }
 
-  @Override
-  public ConfigDef config() {
-    return new ConfigDef();
-  }
+    @Override
+    public Class<? extends Task> taskClass() {
+        return SchemaSourceTask.class;
+    }
+
+    @Override
+    public List<Map<String, String>> taskConfigs(int maxTasks) {
+        ArrayList<Map<String, String>> configs = new ArrayList<>();
+        for (Integer i = 0; i < maxTasks; i++) {
+            Map<String, String> props = new HashMap<>(config);
+            props.put(SchemaSourceTask.ID_CONFIG, i.toString());
+            configs.add(props);
+        }
+        return configs;
+    }
+
+    @Override
+    public void stop() {
+    }
+
+    @Override
+    public ConfigDef config() {
+        return new ConfigDef();
+    }
 }

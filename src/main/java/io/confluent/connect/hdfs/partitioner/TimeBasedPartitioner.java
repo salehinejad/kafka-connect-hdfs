@@ -34,96 +34,87 @@ import io.confluent.connect.hdfs.HdfsSinkConnectorConfig;
 
 public class TimeBasedPartitioner implements Partitioner {
 
-  // Duration of a partition in milliseconds.
-  private long partitionDurationMs;
-  private DateTimeFormatter formatter;
-  protected List<FieldSchema> partitionFields = new ArrayList<>();
-  private static String patternString = "'year'=Y{1,5}/('month'=M{1,5}/)?('day'=d{1,3}/)?('hour'=H{1,3}/)?('minute'=m{1,3}/)?";
-  private static Pattern pattern = Pattern.compile(patternString);
+    // Duration of a partition in milliseconds.
+    private long partitionDurationMs;
+    private DateTimeFormatter formatter;
+    protected List<FieldSchema> partitionFields = new ArrayList<>();
+    private static String patternString = "'year'=Y{1,5}/('month'=M{1,5}/)?('day'=d{1,3}/)?('hour'=H{1,3}/)?('minute'=m{1,3}/)?";
+    private static Pattern pattern = Pattern.compile(patternString);
 
-  protected void init(long partitionDurationMs, String pathFormat, Locale locale,
-                      DateTimeZone timeZone, boolean hiveIntegration) {
-    this.partitionDurationMs = partitionDurationMs;
-    this.formatter = getDateTimeFormatter(pathFormat, timeZone).withLocale(locale);
-    addToPartitionFields(pathFormat, hiveIntegration);
-  }
-
-  private static DateTimeFormatter getDateTimeFormatter(String str, DateTimeZone timeZone) {
-    return DateTimeFormat.forPattern(str).withZone(timeZone);
-  }
-
-  public static long getPartition(long timeGranularityMs, long timestamp, DateTimeZone timeZone) {
-    long adjustedTimeStamp = timeZone.convertUTCToLocal(timestamp);
-    long partitionedTime = (adjustedTimeStamp / timeGranularityMs) * timeGranularityMs;
-    return timeZone.convertLocalToUTC(partitionedTime, false);
-  }
-
-  @Override
-  public void configure(Map<String, Object> config) {
-    long partitionDurationMs = (long) config.get(HdfsSinkConnectorConfig.PARTITION_DURATION_MS_CONFIG);
-    if (partitionDurationMs < 0) {
-      throw new ConfigException(HdfsSinkConnectorConfig.PARTITION_DURATION_MS_CONFIG,
-                                partitionDurationMs, "Partition duration needs to be a positive.");
+    protected void init(long partitionDurationMs, String pathFormat, Locale locale,
+                        DateTimeZone timeZone) {
+        this.partitionDurationMs = partitionDurationMs;
+        this.formatter = getDateTimeFormatter(pathFormat, timeZone).withLocale(locale);
+        addToPartitionFields(pathFormat);
     }
 
-    String pathFormat = (String) config.get(HdfsSinkConnectorConfig.PATH_FORMAT_CONFIG);
-    if (pathFormat.equals("")) {
-      throw new ConfigException(HdfsSinkConnectorConfig.PATH_FORMAT_CONFIG,
-                                pathFormat, "Path format cannot be empty.");
+    private static DateTimeFormatter getDateTimeFormatter(String str, DateTimeZone timeZone) {
+        return DateTimeFormat.forPattern(str).withZone(timeZone);
     }
 
-    String localeString = (String) config.get(HdfsSinkConnectorConfig.LOCALE_CONFIG);
-    if (localeString.equals("")) {
-      throw new ConfigException(HdfsSinkConnectorConfig.LOCALE_CONFIG,
-                                localeString, "Locale cannot be empty.");
-    }
-    String timeZoneString = (String) config.get(HdfsSinkConnectorConfig.TIMEZONE_CONFIG);
-    if (timeZoneString.equals("")) {
-      throw new ConfigException(HdfsSinkConnectorConfig.TIMEZONE_CONFIG,
-                                timeZoneString, "Timezone cannot be empty.");
+    public static long getPartition(long timeGranularityMs, long timestamp, DateTimeZone timeZone) {
+        long adjustedTimeStamp = timeZone.convertUTCToLocal(timestamp);
+        long partitionedTime = (adjustedTimeStamp / timeGranularityMs) * timeGranularityMs;
+        return timeZone.convertLocalToUTC(partitionedTime, false);
     }
 
-    String hiveIntString = (String) config.get(HdfsSinkConnectorConfig.HIVE_INTEGRATION_CONFIG);
-    boolean hiveIntegration = hiveIntString != null && hiveIntString.toLowerCase().equals("true");
+    @Override
+    public void configure(Map<String, Object> config) {
+        long partitionDurationMs = (long) config.get(HdfsSinkConnectorConfig.PARTITION_DURATION_MS_CONFIG);
+        if (partitionDurationMs < 0) {
+            throw new ConfigException(HdfsSinkConnectorConfig.PARTITION_DURATION_MS_CONFIG,
+                partitionDurationMs, "Partition duration needs to be a positive.");
+        }
 
-    Locale locale = new Locale(localeString);
-    DateTimeZone timeZone = DateTimeZone.forID(timeZoneString);
-    init(partitionDurationMs, pathFormat, locale, timeZone, hiveIntegration);
-  }
+        String pathFormat = (String) config.get(HdfsSinkConnectorConfig.PATH_FORMAT_CONFIG);
+        if (pathFormat.equals("")) {
+            throw new ConfigException(HdfsSinkConnectorConfig.PATH_FORMAT_CONFIG,
+                pathFormat, "Path format cannot be empty.");
+        }
 
-  @Override
-  public String encodePartition(SinkRecord sinkRecord) {
-    long timestamp = System.currentTimeMillis();
-    DateTime bucket = new DateTime(getPartition(partitionDurationMs, timestamp, formatter.getZone()));
-    return bucket.toString(formatter);
-  }
-
-
-  @Override
-  public String generatePartitionedPath(String topic, String encodedPartition) {
-    return topic + "/" + encodedPartition;
-  }
-
-  @Override
-  public List<FieldSchema> partitionFields() {
-    return partitionFields;
-  }
-
-  private boolean verifyDateTimeFormat(String pathFormat) {
-    Matcher m = pattern.matcher(pathFormat);
-    return m.matches();
-  }
-
-  private void addToPartitionFields(String pathFormat, boolean hiveIntegration) {
-    if (hiveIntegration && !verifyDateTimeFormat(pathFormat)) {
-      throw new ConfigException(HdfsSinkConnectorConfig.PATH_FORMAT_CONFIG, pathFormat,
-                                "Path format doesn't meet the requirements for Hive integration, "
-                                + "which require prefixing each DateTime component with its name.");
+        String localeString = (String) config.get(HdfsSinkConnectorConfig.LOCALE_CONFIG);
+        if (localeString.equals("")) {
+            throw new ConfigException(HdfsSinkConnectorConfig.LOCALE_CONFIG,
+                localeString, "Locale cannot be empty.");
+        }
+        String timeZoneString = (String) config.get(HdfsSinkConnectorConfig.TIMEZONE_CONFIG);
+        if (timeZoneString.equals("")) {
+            throw new ConfigException(HdfsSinkConnectorConfig.TIMEZONE_CONFIG,
+                timeZoneString, "Timezone cannot be empty.");
+        }
+        Locale locale = new Locale(localeString);
+        DateTimeZone timeZone = DateTimeZone.forID(timeZoneString);
+        init(partitionDurationMs, pathFormat, locale, timeZone);
     }
-    for (String field: pathFormat.split("/")) {
-      String[] parts = field.split("=");
-      FieldSchema fieldSchema = new FieldSchema(parts[0].replace("'", ""), TypeInfoFactory.stringTypeInfo.toString(), "");
-      partitionFields.add(fieldSchema);
+
+    @Override
+    public String encodePartition(SinkRecord sinkRecord) {
+        long timestamp = System.currentTimeMillis();
+        DateTime bucket = new DateTime(getPartition(partitionDurationMs, timestamp, formatter.getZone()));
+        return bucket.toString(formatter);
     }
-  }
+
+
+    @Override
+    public String generatePartitionedPath(String topic, String encodedPartition) {
+        return topic + "/" + encodedPartition;
+    }
+
+    @Override
+    public List<FieldSchema> partitionFields() {
+        return partitionFields;
+    }
+
+    private boolean verifyDateTimeFormat(String pathFormat) {
+        Matcher m = pattern.matcher(pathFormat);
+        return m.matches();
+    }
+
+    private void addToPartitionFields(String pathFormat) {
+        for (String field : pathFormat.split("/")) {
+            String[] parts = field.split("=");
+            FieldSchema fieldSchema = new FieldSchema(parts[0].replace("'", ""), TypeInfoFactory.stringTypeInfo.toString(), "");
+            partitionFields.add(fieldSchema);
+        }
+    }
 }
